@@ -3,8 +3,8 @@ FROM python:3
 RUN apt-get update && apt-get install -y lp-solve
 RUN pip install pandas
 
-COPY generate_lp.py /usr/local/bin/generate_lp
-COPY entrypoint.sh /usr/local/bin/entrypoint
+COPY src/ src/
+WORKDIR src/
 RUN mkdir /data
 
-ENTRYPOINT ["entrypoint"]
+ENTRYPOINT ["./entrypoint.sh"]
