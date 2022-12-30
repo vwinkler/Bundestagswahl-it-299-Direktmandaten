@@ -35,8 +35,49 @@ class Dataset:
         return self.votes_matrix.loc[candidate.constituency, candidate.party]
     
     def get_seats_of_party(self, party : str):
-        return self.seats_relation.loc[party, 'seats']
+        return self.seats_relation.loc[party, 'seats'] 
 
+
+class LPGenerator:
+    def __init__(self, dataset : Dataset):
+        self.dataset = dataset
+        
+    def write_lp_to_file(self, outfile):
+        self.candidates = dataset.get_candidates()
+        
+        outfile.write(self._generate_objective())
+        for party in self.dataset.get_parties():
+            outfile.write(self._generate_party_seats_constraint(party))
+            
+        for constituency in self.dataset.get_constituencies():
+            outfile.write(self._generate_constituency_single_winner_constraint(constituency))
+            
+        outfile.write(self._generate_declaration())
+        
+    def _generate_objective(self):
+        terms = [self._generate_objective_term(candidate)
+                 for candidate in self.dataset.get_candidates()]
+        return f"max: {' + '.join(terms)};\n"
+    
+    def _generate_objective_term(self, candidate):
+        return f"{candidate.get_variable_name()} {self.dataset.get_votes_of_candidate(candidate)}"
+       
+    def _generate_party_seats_constraint(self, party):
+        num_seats = self.dataset.get_seats_of_party(party)
+        candidate_variables = [candidate.get_variable_name()
+                               for candidate in self.dataset.get_party_candidates(party)]
+        return f"{' '.join(candidate_variables)} <= {num_seats};\n"
+    
+    def _generate_constituency_single_winner_constraint(self, constituency):
+        candidate_variables = [candidate.get_variable_name()
+                               for candidate in self.dataset.get_constituency_candidates(constituency)]
+        return f"{' '.join(candidate_variables)} = 1;\n"
+    
+    def _generate_declaration(self):
+        candidate_variables = [candidate.get_variable_name()
+                               for candidate in self.dataset.get_candidates()]
+        return f"binary {', '.join(candidate_variables)};\n"
+        
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -46,23 +87,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     dataset = Dataset(votes_file=args.votes, seats_file=args.seats)
-    candidates = dataset.get_candidates()
+    generator = LPGenerator(dataset)
     with open(args.lpfile, "w") as outfile:
-        elected_candidates = [f"{candidate.get_variable_name()} {dataset.get_votes_of_candidate(candidate)}"
-                              for candidate in candidates]
-        outfile.write(f"max: {' + '.join(elected_candidates)};\n")
-        
-        for party in dataset.get_parties():
-            num_seats = dataset.get_seats_of_party(party)
-            candidates = dataset.get_party_candidates(party)
-            candidate_variables = [candidate.get_variable_name() for candidate in candidates]
-            outfile.write(f"{' '.join(candidate_variables)} <= {num_seats};\n")
-            
-        for constituency in dataset.get_constituencies():
-            candidates = dataset.get_constituency_candidates(constituency)
-            candidate_variables = [candidate.get_variable_name() for candidate in candidates]
-            outfile.write(f"{' '.join(candidate_variables)} = 1;\n")
-            
-        candidate_variables = [candidate.get_variable_name()
-                               for candidate in dataset.get_candidates()]
-        outfile.write(f"binary {', '.join(candidate_variables)};")
+        generator.write_lp_to_file(outfile)
