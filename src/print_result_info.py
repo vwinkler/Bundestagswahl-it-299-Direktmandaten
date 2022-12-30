@@ -2,9 +2,12 @@
 import argparse
 import re
 from Candidate import Candidate
+from Dataset import Dataset
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("votes", type=str)
+    parser.add_argument("seats", type=str)
     parser.add_argument("lp_solve_result_file", type=str)
     args = parser.parse_args()
     
@@ -27,7 +30,15 @@ if __name__ == "__main__":
             elif section == "after variable assignment":
                 pass
             
-    for candidate in sorted(elected_candidates, key=lambda c: c.constituency):
-        print(f"Constituency '{candidate.constituency}':")
-        print(f"  Elected party: {candidate.party}")
+    dataset = Dataset(votes_file=args.votes, seats_file=args.seats)
+            
+    for winner in sorted(elected_candidates, key=lambda c: c.constituency):
+        print(f"Constituency '{winner.constituency}':")
+        print(f"  Elected party: {winner.party}")
+        total_votes = dataset.get_num_voters_in_constituency(winner.constituency)
+        candidates = dataset.get_constituency_candidates(winner.constituency)
+        candidate_votes = [(candidate, dataset.get_votes_of_candidate(candidate))
+                           for candidate in candidates]
+        for (candidate, votes) in sorted(candidate_votes, key=lambda cv: cv[1], reverse=True):
+            print(f"  {candidate.party}: {votes} ({votes / total_votes:.2%})")
         print()
