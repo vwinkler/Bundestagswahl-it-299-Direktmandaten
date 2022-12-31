@@ -25,7 +25,7 @@ class LPGenerator:
         return f"max: {' + '.join(terms)};\n"
     
     def _generate_objective_term(self, candidate):
-        return f"{candidate.get_variable_name()} {self.dataset.get_votes_of_candidate(candidate)}"
+        return f"+{self.dataset.get_votes_of_candidate(candidate)} {candidate.get_variable_name()}"
        
     def _generate_party_seats_constraint(self, party):
         num_seats = self.dataset.get_seats_of_party(party)
