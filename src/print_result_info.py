@@ -39,8 +39,9 @@ if __name__ == "__main__":
         candidates = dataset.get_constituency_candidates(winner.constituency)
         candidate_votes = [(candidate, dataset.get_votes_of_candidate(candidate))
                            for candidate in candidates]
-        for (candidate, votes) in sorted(candidate_votes, key=lambda cv: cv[1], reverse=True):
-            print(f"  {candidate.party}: {votes} ({votes / total_votes:.2%})")
+        candidates_by_votes = sorted(candidate_votes, key=lambda cv: cv[1], reverse=True)
+        for (rank, (candidate, votes)) in enumerate(candidates_by_votes):
+            print(f"  {rank + 1}. {candidate.party}: {votes} ({votes / total_votes:.2%})")
         print()
     
     print("All constituencies:")
