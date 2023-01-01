@@ -14,10 +14,13 @@ if __name__ == "__main__":
     elected_candidates = set()
     with open(args.lp_solve_result_file) as result_file:
         section = "before variable assignment"
+        feasible = True
         for line in result_file:
             if section == "before variable assignment":
                 if re.fullmatch(r"^Actual values of the variables:\s*$", line):
                     section = "variable assignment"
+                elif re.fullmatch(r"^This problem is infeasible\s*$", line):
+                    feasible = False
             elif section == "variable assignment":
                 match = re.fullmatch(r"^(\S+)\s+(0|1)\s*$", line)
                 if match:
@@ -29,6 +32,11 @@ if __name__ == "__main__":
                     section = "after variable assignment"
             elif section == "after variable assignment":
                 pass
+    if not feasible:
+        print("Could not find a seat assignment.")
+        print("lp_solve reports this problem to be infeasible.")
+        print("Do the number of constituencies and the total number of seats match?")
+        exit(1)
             
     dataset = Dataset(votes_file=args.votes, seats_file=args.seats)
             
