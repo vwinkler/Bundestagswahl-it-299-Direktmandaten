@@ -41,5 +41,8 @@ class Dataset:
     def get_seats_of_party(self, party : str):
         return self.seats_relation.loc[party, 'seats']
     
+    def get_total_seats(self):
+        return self.seats_relation.loc[:, 'seats'].sum()
+    
     def get_num_constituency_majority_voters(self):
         return self.votes_matrix.max(axis=1).sum()

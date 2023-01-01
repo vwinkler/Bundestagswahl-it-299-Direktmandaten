@@ -47,6 +47,9 @@ if __name__ == "__main__":
     print("All constituencies:")
     num_represented_votes = sum([dataset.get_votes_of_candidate(candidate)
                                  for candidate in elected_candidates])
+    print(f"  Number of constituencies: {len(dataset.get_constituencies())}")
+    print(f"  Number of parties: {len(dataset.get_parties())}")
+    print(f"  Total number of seats: {dataset.get_total_seats()}")
     print(f"  Represented votes: {num_represented_votes}/{dataset.get_num_voters()}"
           f" ({num_represented_votes / dataset.get_num_voters():.2%})")
     print("  Represented votes had this been a majority election:"
