@@ -19,8 +19,14 @@ class Dataset:
     def get_parties(self):
         return list(self.seats_relation.index)
     
+    def get_num_parties(self):
+        return len(self.seats_relation.index)
+    
     def get_constituencies(self):
         return list(self.votes_matrix.index)
+        
+    def get_num_constituencies(self):
+        return len(self.votes_matrix.index)
     
     def get_party_candidates(self, party : str):
         return [candidate for candidate in self.get_candidates() if candidate.party == party]
@@ -46,3 +52,7 @@ class Dataset:
     
     def get_num_constituency_majority_voters(self):
         return self.votes_matrix.max(axis=1).sum()
+    
+    def get_num_constituencies_headed_by_party(self, party):
+        heading_parties = self.votes_matrix.idxmax(axis=1)
+        return heading_parties[heading_parties == party].count()

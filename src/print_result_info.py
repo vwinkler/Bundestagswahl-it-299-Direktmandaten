@@ -51,7 +51,21 @@ if __name__ == "__main__":
         for (rank, (candidate, votes)) in enumerate(candidates_by_votes):
             print(f"  {rank + 1}. {candidate.party}: {votes} ({votes / total_votes:.2%})")
         print()
-    
+    print()
+        
+    num_constituencies = dataset.get_num_constituencies()
+    for party in dataset.get_parties():
+        print(f"Party '{party}':")
+        elected_party_candidates = [c for c in elected_candidates if c.party == party]
+        print(f"  Won constituencies: {len(elected_party_candidates)}/{num_constituencies}"
+              f" ({len(elected_party_candidates) / num_constituencies:.2%})")
+        constituencies_headed_by_party = dataset.get_num_constituencies_headed_by_party(party)
+        print("  Won constituencies had this been a majority election:"
+              f" {constituencies_headed_by_party}/{num_constituencies}"
+              f" ({constituencies_headed_by_party / num_constituencies:.2%})")
+        print()
+    print()
+
     print("All constituencies:")
     num_represented_votes = sum([dataset.get_votes_of_candidate(candidate)
                                  for candidate in elected_candidates])
