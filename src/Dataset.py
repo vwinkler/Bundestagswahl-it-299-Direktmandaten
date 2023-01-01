@@ -7,8 +7,8 @@ class Dataset:
         self.votes_relation = pd.read_csv(votes_file)
         self.seats_relation = pd.read_csv(seats_file, index_col="party")
         
-        self.votes_matrix = self.votes_relation.pivot(index="constituency", columns="party",
-                                                      values="votes")
+        self.votes_matrix = pd.pivot_table(self.votes_relation, index="constituency", columns="party",
+                                           values="votes", fill_value=0)
         
     def get_candidates(self):
         parties = self.get_parties()
